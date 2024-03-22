@@ -6,25 +6,40 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(warning = FALSE, echo = TRUE)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r load libraries, include=FALSE}
+pacman::p_load(tidyverse, estimatr, knitr, tinytex)
 ```
 
-## Including Plots
+## Background
 
-You can also embed plots, for example:
+The Pennsylvania Re-employment Bonus Experiment was a social experiment conducted in the 1980s to evaluate the effectiveness of a re-employment bonus program. The program was designed to encourage unemployed workers to find new jobs by offering a cash bonus to those who found new jobs within a certain time frame. These experiments were conducted to test the incentive effects of alternative compensation schemes for unemployment insurance (UI). UI claimants are randomly assigned to a control group or one of five treatment groups. The control group is eligible for regular UI benefits, while the treatment groups are eligible for regular UI benefits plus a bonus if they find a job within a certain time frame, provided that the job was retained for a specific duration. This study will focus on the comparison of the control group and merged treatment groups 4 and 6 and analyze the treatment effects of these incentives.
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r load data, include=FALSE}
+penn <- read.table("https://psantanna.com/Econ520/files/penn_jae.dat", header=TRUE)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## Data Exploration and Cleaning
+
+The data set has 13,913 observations across 23 variables. However, we are subsetting this with the control and merged treatment groups. We will merge treatment groups 4 and 6 into one group and subset the data including the control group 0 and treatment group 4. 
+
+```{r merge}
+penn_subset <- penn %>%
+  mutate(tg = ifelse(tg %in% c(4, 6),4,tg)) %>%
+  filter(tg %in% c(0, 4))
+```
+
+With this subset, we have 6,384 observations with 3,354 in the control and 3,030 in the treatment group. There are also no missing data in the subset.
+
+
+## Analyze Treatment Effects
+
+## Takeaways
+
+## Next steps
+
+## Limitations
+
+

@@ -62,8 +62,8 @@ prop_agegt54 <- with(penn_subset, prop.table(table(tg, agegt54), margin =2))
 # all categories except being other race (othrace) where the 57% are in the treatment group
 
 # estimating average treatment effect on log_duration
-lm_ate <- lm_robust(log_duration ~ tg, data = penn_subset)
-summary(lm_ate)
+summary(estimatr::lm_robust(log_duration ~ tg, data = penn_subset))
+
 # point estimate: -0.01989
 # with a p-value of 0.008627, it is statistically significant
 # 95% CI: (-0.0347, -0.005048)
@@ -76,9 +76,23 @@ penn_subset <- penn_subset %>%
 penn_subset <- penn_subset %>%
   mutate(btw35_54 = ifelse(agelt35 == 0 & agegt54 == 0, 1, 0))
 
-# ATE variation for race
+# ATE for the three race groups
+summary(estimatr::lm_robust(log_duration ~ tg + white, data = penn_subset))
+summary(estimatr::lm_robust(log_duration ~ tg + black, data = penn_subset))
+summary(estimatr::lm_robust(log_duration ~ tg + othrace, data = penn_subset))
+summary(estimatr::lm_robust(log_duration ~ tg * white, data = penn_subset))
+summary(estimatr::lm_robust(log_duration ~ tg * black, data = penn_subset))
+summary(estimatr::lm_robust(log_duration ~ tg * othrace, data = penn_subset))
+
+# ATE for the three age groups
+summary(estimatr::lm_robust(log_duration ~ tg + agelt35, data = penn_subset))
+summary(estimatr::lm_robust(log_duration ~ tg + agegt54, data = penn_subset))
+summary(estimatr::lm_robust(log_duration ~ tg + btw35_54, data = penn_subset))
+summary(estimatr::lm_robust(log_duration ~ tg * agelt35, data = penn_subset))
+summary(estimatr::lm_robust(log_duration ~ tg * agegt54, data = penn_subset))
+summary(estimatr::lm_robust(log_duration ~ tg * btw35_54, data = penn_subset))
 
 # ATE variation for age
 
 # ATE variation for gender and race
-
+summary(estimatr::lm_robust(log_duration ~ tg * agelt35 + tg * white, data = penn_subset))
