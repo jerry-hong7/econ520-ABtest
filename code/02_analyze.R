@@ -58,6 +58,16 @@ prop_agelt35 <- with(penn_subset, prop.table(table(tg, agelt35), margin =2))
 # prop table for agegt54
 prop_agegt54 <- with(penn_subset, prop.table(table(tg, agegt54), margin =2))
 
+prop_df <- cbind(prop_female, prop_black, prop_othrace, prop_agelt35, prop_agegt54)
+prop_df
+
+colnames(prop_df) <- c("Male", "Female",
+                                    "Not Black", "Black",
+                                    "Not Other Race", "Other Race",
+                                    "Not Younger 35", "Younger 35",
+                                    "Not Older 54", "Older 54")
+row.names(prop_df) <- c("Control", "Treatment")
+
 # with each proportion table, the control has a slight majority in 
 # all categories except being other race (othrace) where the 57% are in the treatment group
 
