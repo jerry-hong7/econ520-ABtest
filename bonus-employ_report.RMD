@@ -81,6 +81,14 @@ The proportions in the control group are generally higher than the treatment gro
 
 ## Analyze Treatment Effects
 
+We analyze the treatment effect of the re-employment bonus program by running a linear regression model with the log of the employment duration as the dependent variable and the treatment group as the independent variable. 
+
+## Heterogeneity Analysis
+
+We will also conduct a heterogeneity analysis to examine the treatment effects of the re-employment bonus program across different subgroups. We will focus We will run separate regression models for each subgroup and compare the treatment effects.
+
+
+
 ## Takeaways
 
 ## Limitations
