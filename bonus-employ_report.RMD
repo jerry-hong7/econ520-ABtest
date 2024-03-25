@@ -2,7 +2,9 @@
 title: "Evaluating Pennsylvania Re-employment Bonus Experiment"
 author: "Jerry Hong"
 date: "2024-03-25"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -23,19 +25,21 @@ penn <- read.table("https://psantanna.com/Econ520/files/penn_jae.dat", header=TR
 
 ## Data Exploration and Cleaning
 
-The data set has 13,913 observations across 23 variables. However, we are subsetting this with the control and merged treatment groups. We will merge treatment groups 4 and 6 into one group and subset the data including the control group 0 and treatment group 4. 
+The data set has 13,913 observations across 23 variables. However, we are subsetting this with the control and merged treatment groups. We will merge treatment groups 4 and 6 into one group and subset the data including the control group 0 and treatment group 4. We will also recode the 'tg' variable to better distinguish the control and treatment groups.
 
 ```{r merge, include=FALSE}
 penn_subset <- penn %>%
   mutate(tg = ifelse(tg %in% c(4, 6),4,tg)) %>%
+  mutate(log_duration = log(inuidur1)) %>%
   filter(tg %in% c(0, 4))
+
+penn_subset$tg <- ifelse(penn_subset$tg == 0, "Control", "Treatment")
 ```
 
 With this subset, we have 6,384 observations with 3,354 in the control and 3,030 in the treatment group. There are also no missing data in the subset.
 
 ```{r summary stats, echo=FALSE}
-penn_subset %>%
-  mutate(log_duration = log(inuidur1)) %>%
+penn_summary <- penn_subset %>%
   group_by(tg) %>%
   summarize(count=n(),
             avg_unemp_duration = mean(inuidur1, na.rm = TRUE),
@@ -44,6 +48,8 @@ penn_subset %>%
             median_log_duration = median(log_duration, na.rm = TRUE),
             sd_unemp_duration = sd(inuidur1, na.rm = TRUE),
             sd_log_duration = sd(log_duration, na.rm = TRUE))
+
+kable(penn_summary)
 ```
 
 Between the control and treatment groups, the difference in the unemployment duration, even when taking the log, is not as substantial. The control group has a slight increase in duration with roughly 0.9 more weeks of unemployment. Both the median and standard deviations are also marginally similar, indicating slight variations in the distribution of unemployment duration.
@@ -66,7 +72,8 @@ prop_agelt35 <- with(penn_subset, prop.table(table(tg, agelt35), margin =2))
 # prop table for agegt54
 prop_agegt54 <- with(penn_subset, prop.table(table(tg, agegt54), margin =2))
 
-prop_df <- cbind(prop_female, prop_black, prop_othrace, prop_agelt35, prop_agegt54)
+prop_df <- cbind(prop_female, prop_black, prop_othrace, prop_agelt35, prop_agegt54) %>%
+  round(3)
 
 colnames(prop_df) <- c("Male", "Female",
                                     "Not Black", "Black",
@@ -74,22 +81,78 @@ colnames(prop_df) <- c("Male", "Female",
                                     "Not Younger 35", "Younger 35",
                                     "Not Older 54", "Older 54")
 row.names(prop_df) <- c("Control", "Treatment")
-prop_df
+kable(prop_df) 
 ```
 
-The proportions in the control group are generally higher than the treatment group across all categories, except those who are of other race. 
+The proportions in the control group are generally higher than the treatment group across all categories, except those who are of other race. Given there are more participants in the control group, it makes sense we would expect a higher proportion among these categories over the treatment group. This difference may not be substantial enough to indicate a significant difference in the treatment effect. 
 
 ## Analyze Treatment Effects
 
 We analyze the treatment effect of the re-employment bonus program by running a linear regression model with the log of the employment duration as the dependent variable and the treatment group as the independent variable. 
 
+```{r regression, echo=FALSE}
+summary(estimatr::lm_robust(log_duration ~ tg, data = penn_subset))$coefficients
+
+```
+The point estimate is -0.07954, indicating that the treatment group has a lower log of employment duration compared to the control group. This suggests that the re-employment bonus program has a positive effect on reducing the duration of unemployment. The p-value associated with the treatment effect is 0.00863, making the treatment effect statistically significant. 
+
 ## Heterogeneity Analysis
 
-We will also conduct a heterogeneity analysis to examine the treatment effects of the re-employment bonus program across different subgroups. We will focus We will run separate regression models for each subgroup and compare the treatment effects.
+We will also conduct a heterogeneity analysis to examine the treatment effects of the re-employment bonus program across different subgroups. We will focus We will run separate regression models for each subgroup and compare the treatment effects. Before we do that, we will create two variables to added variability.
+
+```{r create variables, include=FALSE}
+# create 'white' race variable
+penn_subset <- penn_subset %>%
+  mutate(white = ifelse(black == 0 & othrace == 0 & hispanic == 0, 1, 0))
+
+# create 'btw35_54' age variable
+penn_subset <- penn_subset %>%
+  mutate(btw35_54 = ifelse(agelt35 == 0 & agegt54 == 0, 1, 0))
+```
+
+```{r race1, echo=FALSE}
+summary(estimatr::lm_robust(log_duration ~ tg*black, data = penn_subset))$coefficients
+
+```
+
+```{r race2, echo=FALSE}
+summary(estimatr::lm_robust(log_duration ~ tg*white, data=penn_subset))$coefficients
+
+```
+```{r race3, echo=FALSE}
+summary(estimatr::lm_robust(log_duration ~ tg*othrace, data=penn_subset))$coefficients
+```
+
+```{r race_comp, echo=FALSE}
+summary(estimatr::lm_robust(log_duration ~ tg*(black+white), data=penn_subset))$coefficients
+```
+
+
+```{r age1, echo=FALSE}
+summary(estimatr::lm_robust(log_duration ~ tg*btw35_54 + tg*agelt35, data=penn_subset))$coefficients
+```
+
+```{r age2, echo=FALSE}
+summary(estimatr::lm_robust(log_duration ~ tg*btw35_54 + tg*agegt54, data=penn_subset))$coefficients
+```
+
+```{r age_comp, echo=FALSE}
+summary(estimatr::lm_robust(log_duration ~ tg*(agelt35+agegt54), data=penn_subset))$coefficients
+```
+
+```{r gender_race1, echo=FALSE}
+summary(estimatr::lm_robust(log_duration ~ tg + female*black, data=penn_subset))$coefficients
+```
+```{r gender_race2, echo=FALSE}
+summary(estimatr::lm_robust(log_duration ~ tg + (female*white), data=penn_subset))$coefficients
+```
 
 
 
 ## Takeaways
+
+The re-employment bonus program has 
+
 
 ## Limitations
 
