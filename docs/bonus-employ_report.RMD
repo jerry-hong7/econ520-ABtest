@@ -137,17 +137,17 @@ penn_subset <- penn_subset %>%
 ### Variations for Race
 
 ```{r race1, echo=FALSE}
-summary(estimatr::lm_robust(log_duration ~ tg + black, data = penn_subset))$coefficients
+summary(estimatr::lm_robust(log_duration ~ tg * black, data = penn_subset))$coefficients
 ```
 
 ```{r race2, echo=FALSE}
-summary(estimatr::lm_robust(log_duration ~ tg + white, data=penn_subset))$coefficients
+summary(estimatr::lm_robust(log_duration ~ tg * white, data=penn_subset))$coefficients
 ```
 
 ```{r race3, echo=FALSE}
-summary(estimatr::lm_robust(log_duration ~ tg + othrace, data=penn_subset))$coefficients
+summary(estimatr::lm_robust(log_duration ~ tg * othrace, data=penn_subset))$coefficients
 ```
-When just looking at the individual race groups and their combined effects with the treatment effect there are a couple things worth noting. First, there is statistical significance when including black and white race groups but not for other race. This may be due to the smaller sample size for this group compared to the other race groups. Another thing to note is being white is the only of the three groups that led to an increase in the log of employment duration. Given its statistical significance, this may be a factor in the treatment effect. 
+When just looking at the individual race groups and their combined effects with the treatment effect there are a couple things worth noting. First, there is statistical significance when including black and white race groups regardless of treatment, but not for other race. This may be due to the smaller sample size for this group compared to the other race groups. Another thing to note is that for all interactions for each group and treatment
 
 
 Now, let's look at how the treatment effect varies across these race groups. To do this, we will set one of the groups as a reference and compare the treatment effects of the other groups to the reference group. The *other* race group will be the reference.
@@ -155,25 +155,25 @@ Now, let's look at how the treatment effect varies across these race groups. To 
 ```{r race_comp, echo=FALSE}
 summary(estimatr::lm_robust(log_duration ~ tg*(black+white), data=penn_subset))$coefficients
 ```
-Based on the p-values of the interaction terms, we see that the treatment effect with the respective race group is not statistically significant compared to the reference group. Thus, we can conclude that the interactions between treatment and race does not have a significant impact on the treatment effect.
+Based on the p-values of the interaction terms, we see that the treatment effect with the respective race group is not statistically significant compared to the reference group. Thus, we can conclude that the interactions between treatment and race does not have a significant impact towards the treatment effect.
 
 ### Variations for Age
 
 To check for variation across age groups, we will first look at the treatment effects for each age group.
 
 ```{r age1, echo=FALSE}
-summary(estimatr::lm_robust(log_duration ~ tg+agelt35, data=penn_subset))$coefficients
+summary(estimatr::lm_robust(log_duration ~ tg * agelt35, data=penn_subset))$coefficients
 ```
 
 ```{r age2, echo=FALSE}
-summary(estimatr::lm_robust(log_duration ~ tg+agegt54, data=penn_subset))$coefficients
+summary(estimatr::lm_robust(log_duration ~ tg * agegt54, data=penn_subset))$coefficients
 ```
 
 ```{r age3, echo=FALSE}
-summary(estimatr::lm_robust(log_duration ~ tg+btw35_54, data=penn_subset))$coefficients
+summary(estimatr::lm_robust(log_duration ~ tg * btw35_54, data=penn_subset))$coefficients
 ```
 
-Generally, we see that the effect for each age group is statistically significant. What is interesting is that those who are younger than 35 leads to a lower log duration of unemployment compared to those who are between 35-54 and older than 54. This may be due to the fact that younger individuals may have more flexibility in finding new jobs compared to older individuals. 
+Generally, we see that the effect for each age group excluding treatment is statistically significant. What is interesting is that those who are younger than 35 leads to a lower log duration of unemployment compared to those who are between 35-54 and older than 54. This may be due to the fact that younger individuals may have more flexibility in finding new jobs compared to older individuals. However, like race, their interactions with treatment are all not statistically significant.
 
 Next, we will check if the treatment varies across age. We will use the between 35-54 age group as the reference group.
 

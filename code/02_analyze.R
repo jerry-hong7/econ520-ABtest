@@ -110,17 +110,17 @@ penn_subset <- penn_subset %>%
   mutate(btw35_54 = ifelse(agelt35 == 0 & agegt54 == 0, 1, 0))
 
 # ATE for the three race groups
-summary(estimatr::lm_robust(log_duration ~ tg + white, data = penn_subset))
-summary(estimatr::lm_robust(log_duration ~ tg + black, data = penn_subset))
-summary(estimatr::lm_robust(log_duration ~ tg + othrace, data = penn_subset))
+summary(estimatr::lm_robust(log_duration ~ tg * white, data = penn_subset))
+summary(estimatr::lm_robust(log_duration ~ tg * black, data = penn_subset))
+summary(estimatr::lm_robust(log_duration ~ tg * othrace, data = penn_subset))
 
 # ATE variation for race, setting othrace as reference
 summary(estimatr::lm_robust(log_duration ~ tg*(white+black), data = penn_subset))
 
 # ATE for the three age groups
-summary(estimatr::lm_robust(log_duration ~ tg + agelt35, data = penn_subset))
-summary(estimatr::lm_robust(log_duration ~ tg + agegt54, data = penn_subset))
-summary(estimatr::lm_robust(log_duration ~ tg + btw35_54, data = penn_subset))
+summary(estimatr::lm_robust(log_duration ~ tg * agelt35, data = penn_subset))
+summary(estimatr::lm_robust(log_duration ~ tg * agegt54, data = penn_subset))
+summary(estimatr::lm_robust(log_duration ~ tg * btw35_54, data = penn_subset))
 
 # ATE variation for age, setting btw35_54 as reference
 summary(estimatr::lm_robust(log_duration ~ tg*(agelt35+agegt54), data = penn_subset))
